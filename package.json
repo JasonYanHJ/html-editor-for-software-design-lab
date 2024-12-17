@@ -1,0 +1,26 @@
+{
+  "name": "html-edtior",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/Main.ts",
+  "scripts": {
+    "start": "cd playground && ts-node --project ../tsconfig.json -r tsconfig-paths/register ../src/Main.ts",
+    "test": "ts-mocha -r tsconfig-paths/register \"test/**/*.spec.ts\""
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/mock-fs": "^4.13.4",
+    "@types/node": "^22.10.0",
+    "mock-fs": "^5.4.1",
+    "ts-mocha": "^10.0.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "axios": "^1.7.8",
+    "cheerio": "^1.0.0"
+  }
+}
