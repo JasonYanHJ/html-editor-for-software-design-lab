@@ -4,6 +4,7 @@ import { ListIO } from "@io/ListIO";
 import { CheerioParserService } from "@service/parser/CheerioParserService";
 import { Printer } from "@service/printer/Printer";
 import { LanguageToolSpellCheckService } from "@service/spell-check/LanguageToolSpellCheckService";
+import { ReactiveCachedDecorator } from "@service/spell-check/ReactiveCachedDecorator";
 
 export let input: string[], output: string[];
 export let factory: CommandFactory;
@@ -17,7 +18,7 @@ beforeEach(() => {
   factory = new CommandFactory(
     session,
     io,
-    new LanguageToolSpellCheckService(),
+    new ReactiveCachedDecorator(new LanguageToolSpellCheckService()),
     new Printer(),
     new CheerioParserService()
   );

@@ -1,3 +1,4 @@
+import { EventMediator } from "@core/event-mediator/EventMediator";
 import { Node } from "./Node";
 import { TextNode } from "./TextNode";
 import { Visitor } from "./VisitorPattern";
@@ -24,8 +25,14 @@ export class TagNode implements Node {
   }
 
   setText(text: string | undefined) {
+    const oldText = this.text;
     if (!text) this.textNode = undefined;
     else this.textNode = new TextNode(text);
+
+    EventMediator.getInstance().notify("text-change", {
+      oldText,
+      newText: text,
+    });
   }
 
   insert(tagNode: TagNode, index?: number) {
