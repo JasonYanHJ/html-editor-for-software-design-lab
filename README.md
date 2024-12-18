@@ -32,7 +32,7 @@ npm run test
 
 ### 模块设计概述
 
-![uml](https://imgur.com/RQDWV7I.jpg)
+![uml](https://i.imgur.com/WScD3HM.jpg)
 
 图中展示了本项目的模块以及主要的接口与类设计：
 
@@ -45,7 +45,7 @@ npm run test
 
 #### 组合模式
 
-参考文章：[Refactoring.Guru](https://refactoringguru.cn/design-patterns/composite)
+参考文章：[Refactoring.Guru Composite](https://refactoringguru.cn/design-patterns/composite)
 
 <img style="width: 40%" src="https://i.imgur.com/tS2jJkC.png" />
 
@@ -53,7 +53,7 @@ npm run test
 
 #### 访问者模式
 
-参考文章：[Refactoring.Guru](https://refactoringguru.cn/design-patterns/visitor)
+参考文章：[Refactoring.Guru Visitor](https://refactoringguru.cn/design-patterns/visitor)
 
 <img style="width: 70%" src="https://i.imgur.com/gyuJTVP.png" />
 
@@ -62,7 +62,7 @@ npm run test
 
 #### 适配器模式
 
-参考文章：[Refactoring.Guru](https://refactoringguru.cn/design-patterns/adapter)
+参考文章：[Refactoring.Guru Adapter](https://refactoringguru.cn/design-patterns/adapter)
 
 <img style="width: 70%" src="https://i.imgur.com/poMwKpv.png" />
 
@@ -79,7 +79,7 @@ npm run test
 
 #### 命令模式
 
-参考文章：[Refactoring.Guru](https://refactoringguru.cn/design-patterns/command)
+参考文章：[Refactoring.Guru Command](https://refactoringguru.cn/design-patterns/command)
 
 <img style="width: 70%" src="https://i.imgur.com/UNMa3ra.png" />
 
@@ -89,7 +89,7 @@ npm run test
 
 #### 装饰器模式
 
-参考文章：[Refactoring.Guru](https://refactoringguru.cn/design-patterns/decorator)
+参考文章：[Refactoring.Guru Decorator](https://refactoringguru.cn/design-patterns/decorator)
 
 <img style="width: 70%" src="https://i.imgur.com/g7l7Y0h.png" />
 
@@ -144,11 +144,49 @@ npm run test
 
   - 因此，假设有`n`种装饰，使用装饰器模式仅需创建`n`种装饰器类；使用继承则需要创建`2^n`种子类。
 
-项目中一共三处使用了装饰器模式：
+项目中一共四处使用了装饰器模式：
 
 - `dir-tree`、`dir-indent`打印目录时，使用“\*”号装饰文件名称
 - `print-tree`打印 HTML 内容时，使用“[X]”装饰拼写错误的文本
-- 使用`CanUndoDecarator`装饰所有可以被撤销的命令（装饰的行为：在 execute 后将命令自身添加到记录类中去）
+- 使用`CanUndoDecorator`装饰所有可以被撤销的命令（装饰 execute：在 execute 后将命令自身添加到记录类中去）
+- 使用`ReactiveCachedDecorator`装饰`SpellCheckService`（装饰 check：在 check 前先检查是否已有缓存）
+
+#### 发布订阅模式（中介者模式+观察者模式）
+
+参考文章：[Refactoring.Guru Mediator](https://refactoringguru.cn/design-patterns/mediator)、[Refactoring.Guru Observer](https://refactoringguru.cn/design-patterns/observer)、[Pub/Sub Pattern](https://medium.com/jimmy-wang/%E7%B3%BB%E7%B5%B1%E8%A8%AD%E8%A8%88%E5%85%A5%E9%96%80-pub-sub-pattern-ec391aca22aa)
+
+<img style="width: 70%" src="https://i.imgur.com/54Bx0n9.jpg" />
+
+发布订阅模式是一种常用的消息传递模式，通常结合了中介者模式和观察者模式。它允许对象之间的松耦合通信，使得发布者和订阅者之间不直接交互，而是通过一个中介者进行通信。
+
+场景：
+
+- 我们发现`spell-check`和`print-tree`命令的执行耗时较长，因为它们需要在触发时对所有的文本节点发送拼写检查请求。
+- 注意到我们可以在文本内容发生改变时，在后台提前进行拼写检查，将结果缓存。当需要执行拼写检查相关命令时，首先从缓存中查找结果，从而减少命令的执行耗时。
+- 我们需要一种机制在文本内容发生改变(`TagNode`的`setText`函数执行)时，“发布”事件通知相关组件进行检查并缓存结果。
+- 考虑到“订阅”事件的组件可能有许多非核心组件，我们不希望直接在`setText`函数执行的末尾直接添加上这些组件的相关函数，因为这可能导致核心组件的频繁修改、且容易因为非核心组件的 bug 导致影响整个核心业务。因此我们需要一种“松耦合”的消息传递模式。
+
+在这种场景下，可以使用发布订阅模式：
+
+- 创建一个转发事件的中介者`EventMediator`
+- 组件可以“订阅”某类事件，并指定如何响应该事件（传递一个 callback 回调函数）
+- `EventMediator`记录下这些回调函数
+- 组件可以要求`EventMediator`“发布”事件以及相关的数据
+- `EventMediator`根据事件类型查找记录的所有回调函数，并以相关数据作为参数依次调用这些回调函数
+
+#### 单例模式
+
+参考文章：[Refactoring.Guru Singleton](https://refactoringguru.cn/design-patterns/singleton)
+
+<img style="width: 50%" src="https://i.imgur.com/h2PeVBa.jpg" />
+
+单例模式的目的是使全局只有唯一的对象实例，这通常可以通过私有化构造函数并提供一个静态的`getInstance`函数来实现。单例模式有几个优点：
+
+- 如果类的实例占用大量资源（如数据库连接、线程池等），单例模式可以有效地控制资源的使用，避免过多的实例消耗系统资源
+- 单例模式提供一个全局访问点，能够避免在程序的多个部分传递同一个对象
+- 单例模式的实现可以支持延迟加载，即在第一次使用时创建实例，而不是在程序启动时就创建，这可以提高程序启动速度
+
+本项目中，事件中介`EventMediator`使用了单例模式。
 
 ### SOLID 设计原则
 
@@ -168,7 +206,11 @@ npm run test
 
 > 软件应该是对于扩展开放的，但是对于修改封闭
 
-许多设计模式的使用正是为了维持这一原则。例如，针对打印功能使用适配器模式，从而避免了对`Printer`类或是`Node`等类的修改；又例如，使用装饰器类来添加新的装饰功能，从而避免了直接修改原本的类。
+许多设计模式的使用正是为了维持这一原则：
+
+- 针对打印功能使用适配器模式，从而避免了对`Printer`类或是`Node`等类的修改
+- 使用装饰器类来添加新的装饰功能，从而避免了直接修改原本的类
+- 使用发布订阅模式，从而在避免修改“发布者”组件的情况下能够扩展“订阅者”组件
 
 通过避免修改现有代码，可以减少引入新错误的风险。
 
