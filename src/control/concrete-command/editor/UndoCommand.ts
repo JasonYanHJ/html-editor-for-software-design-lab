@@ -9,6 +9,6 @@ export class UndoCommand extends Command {
   }
 
   async execute(): Promise<void> {
-    this.editor.records.undo();
+    await this.editor.records.undo();
   }
 }
